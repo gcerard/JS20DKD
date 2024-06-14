@@ -57,15 +57,14 @@
         let cropper;
 
         function cropAndGenerate() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            if (!file) {
-                alert('Please upload an image first.');
+            if (!cropper) {
+                alert('Please upload an image and crop it first.');
                 return;
             }
 
             // Get the cropped image data
-            const croppedData = cropper.getCroppedCanvas().toDataURL('image/jpeg');
+            const croppedCanvas = cropper.getCroppedCanvas();
+            const croppedData = croppedCanvas.toDataURL('image/jpeg');
 
             // Generate Twibbon
             generateTwibbon(croppedData);
