@@ -31,11 +31,9 @@
             border: 1px solid #ccc;
             display: none; /* Hide the canvas initially */
         }
-        #preview {
+        #cropper {
             max-width: 100%;
-            max-height: 500px;
-            border: 1px solid #ccc;
-            margin-top: 10px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -44,66 +42,43 @@
         <h2>Twibbon Generator</h2>
         <input type="file" id="fileInput" accept="image/*">
         <br><br>
-        <div>
-            <label for="resizeWidth">Width:</label>
-            <input type="number" id="resizeWidth" min="1" value="500">
-            <label for="resizeHeight">Height:</label>
-            <input type="number" id="resizeHeight" min="1" value="500">
-            <button class="btn" onclick="resizeImage()">Resize Image</button>
+        <div id="cropper">
+            <!-- Image will be displayed here for cropping -->
         </div>
-        <br>
-        <div id="previewContainer">
-            <h3>Preview:</h3>
-            <img id="preview" src="" alt="Preview">
-        </div>
-        <br><br>
-        <button class="btn" onclick="generateTwibbon()">Generate Twibbon</button>
+        <button class="btn" onclick="cropAndGenerate()">Crop and Generate Twibbon</button>
         <br><br>
         <canvas id="canvas" width="500" height="500"></canvas>
     </div>
 
+    <!-- Cropper.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
     <script>
-        function resizeImage() {
-            const fileInput = document.getElementById('fileInput');
-            const preview = document.getElementById('preview');
-            const resizeWidth = document.getElementById('resizeWidth').value;
-            const resizeHeight = document.getElementById('resizeHeight').value;
+        let cropper;
 
-            const file = fileInput.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-
-                        canvas.width = resizeWidth;
-                        canvas.height = resizeHeight;
-
-                        ctx.drawImage(img, 0, 0, resizeWidth, resizeHeight);
-
-                        preview.src = canvas.toDataURL('image/jpeg');
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                alert('Please upload an image file.');
+        function cropAndGenerate() {
+            if (!cropper) {
+                alert('Please upload an image first.');
+                return;
             }
+
+            // Get the cropped image data
+            const croppedData = cropper.getCroppedCanvas().toDataURL('image/jpeg');
+
+            // Generate Twibbon
+            generateTwibbon(croppedData);
         }
 
-        function generateTwibbon() {
-            const preview = document.getElementById('preview');
+        function generateTwibbon(croppedData) {
             const canvas = document.getElementById('canvas');
             const ctx = canvas.getContext('2d');
 
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
             const img = new Image();
             img.onload = function() {
-                canvas.width = img.width;
-                canvas.height = img.height;
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // Draw the image
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
                 // Draw the twibbon frame
@@ -121,8 +96,39 @@
                 };
                 frameImg.src = 'twibbon.png'; // Update with your frame image path
             };
-            img.src = preview.src;
+            img.src = croppedData;
         }
+
+        // Initialize Cropper.js on image load
+        const fileInput = document.getElementById('fileInput');
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const image = new Image();
+                image.onload = function() {
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+                    const cropperContainer = document.getElementById('cropper');
+                    cropper = new Cropper(image, {
+                        aspectRatio: 1, // Square aspect ratio
+                        viewMode: 1, // Restrict the crop box to within the container
+                        crop(event) {
+                            // You can add cropping visualization or other actions here if needed
+                        },
+                    });
+                    cropperContainer.innerHTML = ''; // Clear container
+                    cropperContainer.appendChild(image); // Append image to container
+                };
+                image.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
     </script>
 </body>
 </html>
