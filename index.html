@@ -81,6 +81,11 @@
                 displayCanvas.addEventListener('mouseup', stopDragging);
                 displayCanvas.addEventListener('mouseout', stopDragging);
                 displayCanvas.addEventListener('wheel', resizeImage);
+
+                // Add touch event listeners for mobile devices
+                displayCanvas.addEventListener('touchstart', startDragging);
+                displayCanvas.addEventListener('touchmove', dragImage);
+                displayCanvas.addEventListener('touchend', stopDragging);
             } else {
                 alert('Please upload an image file.');
             }
@@ -100,33 +105,52 @@
             displayCtx.drawImage(canvas, 0, 0, canvas.width * scale, canvas.height * scale);
         }
 
-        function startDragging(e) {
-            const scale = canvas.width / displayCanvas.width;
-            isDragging = true;
-            startX = e.offsetX * scale - imgX;
-            startY = e.offsetY * scale - imgY;
+        function getOffset(event) {
+            if (event.touches) {
+                const touch = event.touches[0];
+                return {
+                    x: touch.clientX - displayCanvas.getBoundingClientRect().left,
+                    y: touch.clientY - displayCanvas.getBoundingClientRect().top
+                };
+            }
+            return {
+                x: event.offsetX,
+                y: event.offsetY
+            };
         }
 
-        function dragImage(e) {
+        function startDragging(event) {
+            const scale = canvas.width / displayCanvas.width;
+            const offset = getOffset(event);
+            isDragging = true;
+            startX = offset.x * scale - imgX;
+            startY = offset.y * scale - imgY;
+            event.preventDefault(); // Prevent scrolling on touch devices
+        }
+
+        function dragImage(event) {
             if (isDragging) {
                 const scale = canvas.width / displayCanvas.width;
-                imgX = e.offsetX * scale - startX;
-                imgY = e.offsetY * scale - startY;
+                const offset = getOffset(event);
+                imgX = offset.x * scale - startX;
+                imgY = offset.y * scale - startY;
                 drawImage();
+                event.preventDefault(); // Prevent scrolling on touch devices
             }
         }
 
-        function stopDragging() {
+        function stopDragging(event) {
             isDragging = false;
         }
 
-        function resizeImage(e) {
-            if (e.deltaY < 0) {
+        function resizeImage(event) {
+            if (event.deltaY < 0) {
                 imgScale *= 1.1;
             } else {
                 imgScale /= 1.1;
             }
             drawImage();
+            event.preventDefault(); // Prevent zooming on touch devices
         }
 
         function downloadImage() {
