@@ -118,39 +118,4 @@
             const croppedCanvas = cropper.getCroppedCanvas({ width: 500, height: 500 });
             const croppedData = croppedCanvas.toDataURL('image/jpeg');
 
-            // Hide step 2, show step 3
-            document.getElementById('step2').style.display = 'none';
-            document.getElementById('step3').style.display = 'block';
-
-            // Generate Twibbon
-            const canvas = document.getElementById('canvas');
-            const ctx = canvas.getContext('2d');
-
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const img = new Image();
-            img.onload = function() {
-                // Draw the image
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                // Draw the twibbon frame
-                const frameImg = new Image();
-                frameImg.onload = function() {
-                    ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-
-                    // Export canvas as an image
-                    const twibbonImage = canvas.toDataURL('image/png');
-
-                    // Display the generated twibbon image
-                    const generatedImage = new Image();
-                    generatedImage.src = twibbonImage;
-                    document.body.appendChild(generatedImage); // Example: append to body
-                };
-                frameImg.src = 'twibbon.png'; // Update with your frame image path
-            };
-            img.src = croppedData;
-        }
-    </script>
-</body>
-</html>
+            // Hide step 2, s
