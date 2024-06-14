@@ -56,6 +56,7 @@
         let startX, startY;
         let imgX = 0, imgY = 0;
         let imgScale = 1;
+        let initialDistance = 0;
 
         function generateTwibbon() {
             const fileInput = document.getElementById('fileInput');
@@ -86,6 +87,7 @@
                 displayCanvas.addEventListener('touchstart', startDragging);
                 displayCanvas.addEventListener('touchmove', dragImage);
                 displayCanvas.addEventListener('touchend', stopDragging);
+                displayCanvas.addEventListener('touchmove', handlePinch);
             } else {
                 alert('Please upload an image file.');
             }
@@ -125,6 +127,9 @@
             isDragging = true;
             startX = offset.x * scale - imgX;
             startY = offset.y * scale - imgY;
+            if (event.touches && event.touches.length === 2) {
+                initialDistance = getDistance(event.touches);
+            }
             event.preventDefault(); // Prevent scrolling on touch devices
         }
 
@@ -151,6 +156,25 @@
             }
             drawImage();
             event.preventDefault(); // Prevent zooming on touch devices
+        }
+
+        function handlePinch(event) {
+            if (event.touches.length === 2) {
+                const currentDistance = getDistance(event.touches);
+                if (initialDistance > 0) {
+                    const scaleChange = currentDistance / initialDistance;
+                    imgScale *= scaleChange;
+                    initialDistance = currentDistance;
+                    drawImage();
+                }
+                event.preventDefault(); // Prevent scrolling on touch devices
+            }
+        }
+
+        function getDistance(touches) {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
         }
 
         function downloadImage() {
