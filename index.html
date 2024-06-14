@@ -29,6 +29,14 @@
         }
         canvas {
             border: 1px solid #ccc;
+            cursor: move;
+        }
+        .handle {
+            width: 10px;
+            height: 10px;
+            background: red;
+            position: absolute;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -39,7 +47,7 @@
         <br><br>
         <button class="btn" onclick="generateTwibbon()">Generate Twibbon</button>
         <br><br>
-        <canvas id="canvas" width="300" height="300"></canvas>
+        <canvas id="canvas" width="500" height="500"></canvas>
         <br><br>
         <button class="btn" onclick="downloadImage()">Download Image</button>
     </div>
@@ -50,9 +58,13 @@
         frameImg.src = 'twibbon.png'; // Update with your frame image path
         let canvas, ctx;
         let isDragging = false;
+        let isResizing = false;
         let startX, startY;
         let imgX = 0, imgY = 0;
         let imgScale = 1;
+        let imgWidth, imgHeight;
+        let handleSize = 10;
+        let handleX, handleY;
 
         function generateTwibbon() {
             const fileInput = document.getElementById('fileInput');
@@ -64,6 +76,10 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     img.onload = function() {
+                        imgWidth = img.width;
+                        imgHeight = img.height;
+                        handleX = imgX + imgWidth;
+                        handleY = imgY + imgHeight;
                         drawImage();
                     };
                     img.src = e.target.result;
@@ -75,7 +91,6 @@
                 canvas.addEventListener('mousemove', dragImage);
                 canvas.addEventListener('mouseup', stopDragging);
                 canvas.addEventListener('mouseout', stopDragging);
-                canvas.addEventListener('wheel', resizeImage);
             } else {
                 alert('Please upload an image file.');
             }
@@ -83,35 +98,63 @@
 
         function drawImage() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, imgX, imgY, img.width * imgScale, img.height * imgScale);
+            ctx.drawImage(img, imgX, imgY, imgWidth, imgHeight);
             ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+            drawHandle();
+        }
+
+        function drawHandle() {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(handleX - handleSize / 2, handleY - handleSize / 2, handleSize, handleSize);
         }
 
         function startDragging(e) {
-            isDragging = true;
-            startX = e.offsetX - imgX;
-            startY = e.offsetY - imgY;
+            const mouseX = e.offsetX;
+            const mouseY = e.offsetY;
+
+            if (isOverHandle(mouseX, mouseY)) {
+                isResizing = true;
+                startX = mouseX;
+                startY = mouseY;
+            } else {
+                isDragging = true;
+                startX = mouseX - imgX;
+                startY = mouseY - imgY;
+            }
         }
 
         function dragImage(e) {
             if (isDragging) {
                 imgX = e.offsetX - startX;
                 imgY = e.offsetY - startY;
+                handleX = imgX + imgWidth;
+                handleY = imgY + imgHeight;
+                drawImage();
+            } else if (isResizing) {
+                const mouseX = e.offsetX;
+                const mouseY = e.offsetY;
+                const dx = mouseX - startX;
+                const dy = mouseY - startY;
+
+                imgWidth += dx;
+                imgHeight += dy;
+                startX = mouseX;
+                startY = mouseY;
+
+                handleX = imgX + imgWidth;
+                handleY = imgY + imgHeight;
                 drawImage();
             }
         }
 
         function stopDragging() {
             isDragging = false;
+            isResizing = false;
         }
 
-        function resizeImage(e) {
-            if (e.deltaY < 0) {
-                imgScale *= 1.1;
-            } else {
-                imgScale /= 1.1;
-            }
-            drawImage();
+        function isOverHandle(mouseX, mouseY) {
+            return mouseX >= handleX - handleSize / 2 && mouseX <= handleX + handleSize / 2 &&
+                   mouseY >= handleY - handleSize / 2 && mouseY <= handleY + handleSize / 2;
         }
 
         function downloadImage() {
