@@ -29,6 +29,8 @@
         }
         canvas {
             border: 1px solid #ccc;
+            width: 500px;  /* Display size */
+            height: 500px; /* Display size */
         }
     </style>
 </head>
@@ -39,7 +41,8 @@
         <br><br>
         <button class="btn" onclick="generateTwibbon()">Generate Twibbon</button>
         <br><br>
-        <canvas id="canvas" width="1080" height="1080"></canvas>
+        <canvas id="canvas" width="1080" height="1080" style="display: none;"></canvas>
+        <canvas id="displayCanvas" width="500" height="500"></canvas>
         <br><br>
         <button class="btn" onclick="downloadImage()">Download Image</button>
     </div>
@@ -48,7 +51,7 @@
         let img = new Image();
         let frameImg = new Image();
         frameImg.src = 'twibbon.png'; // Update with your frame image path
-        let canvas, ctx;
+        let displayCanvas, displayCtx, canvas, ctx;
         let isDragging = false;
         let startX, startY;
         let imgX = 0, imgY = 0;
@@ -58,6 +61,8 @@
             const fileInput = document.getElementById('fileInput');
             canvas = document.getElementById('canvas');
             ctx = canvas.getContext('2d');
+            displayCanvas = document.getElementById('displayCanvas');
+            displayCtx = displayCanvas.getContext('2d');
 
             const file = fileInput.files[0];
             if (file) {
@@ -71,32 +76,41 @@
                 reader.readAsDataURL(file);
 
                 // Add event listeners for repositioning the image
-                canvas.addEventListener('mousedown', startDragging);
-                canvas.addEventListener('mousemove', dragImage);
-                canvas.addEventListener('mouseup', stopDragging);
-                canvas.addEventListener('mouseout', stopDragging);
-                canvas.addEventListener('wheel', resizeImage);
+                displayCanvas.addEventListener('mousedown', startDragging);
+                displayCanvas.addEventListener('mousemove', dragImage);
+                displayCanvas.addEventListener('mouseup', stopDragging);
+                displayCanvas.addEventListener('mouseout', stopDragging);
+                displayCanvas.addEventListener('wheel', resizeImage);
             } else {
                 alert('Please upload an image file.');
             }
         }
 
         function drawImage() {
+            // Calculate scale ratio between display and actual canvas
+            const scale = displayCanvas.width / canvas.width;
+
+            // Draw on the actual canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(img, imgX, imgY, img.width * imgScale, img.height * imgScale);
             ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+
+            // Draw on the display canvas
+            displayCtx.clearRect(0, 0, displayCanvas.width, displayCanvas.height);
+            displayCtx.drawImage(canvas, 0, 0, canvas.width * scale, canvas.height * scale);
         }
 
         function startDragging(e) {
             isDragging = true;
-            startX = e.offsetX - imgX;
-            startY = e.offsetY - imgY;
+            startX = e.offsetX - imgX * (canvas.width / displayCanvas.width);
+            startY = e.offsetY - imgY * (canvas.width / displayCanvas.width);
         }
 
         function dragImage(e) {
             if (isDragging) {
-                imgX = e.offsetX - startX;
-                imgY = e.offsetY - startY;
+                const scale = canvas.width / displayCanvas.width;
+                imgX = (e.offsetX - startX) * scale;
+                imgY = (e.offsetY - startY) * scale;
                 drawImage();
             }
         }
