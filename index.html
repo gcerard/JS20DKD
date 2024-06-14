@@ -70,7 +70,7 @@
 
     <script>
         let cropper;
-        let croppedData;
+        let uploadedImage;
 
         function startCrop() {
             const fileInput = document.getElementById('fileInput');
@@ -85,25 +85,25 @@
                 const image = new Image();
                 image.onload = function() {
                     if (cropper) {
-                        cropper.replace(image.src);
-                    } else {
-                        const cropperContainer = document.getElementById('cropper');
-                        cropper = new Cropper(image, {
-                            aspectRatio: 1, // Square aspect ratio
-                            viewMode: 1, // Restrict the crop box to within the container
-                            crop(event) {
-                                // You can add cropping visualization or other actions here if needed
-                            },
-                        });
-                        cropperContainer.innerHTML = ''; // Clear container
-                        cropperContainer.appendChild(image); // Append image to container
+                        cropper.destroy();
                     }
+                    const cropperContainer = document.getElementById('cropper');
+                    cropper = new Cropper(image, {
+                        aspectRatio: 1, // Square aspect ratio
+                        viewMode: 1, // Restrict the crop box to within the container
+                        crop(event) {
+                            // You can add cropping visualization or other actions here if needed
+                        },
+                    });
+                    cropperContainer.innerHTML = ''; // Clear container
+                    cropperContainer.appendChild(image); // Append image to container
 
                     // Show step 2, hide step 1
                     document.getElementById('step1').style.display = 'none';
                     document.getElementById('step2').style.display = 'block';
                 };
                 image.src = e.target.result;
+                uploadedImage = image; // Save the uploaded image
             };
             reader.readAsDataURL(file);
         }
@@ -116,7 +116,7 @@
 
             // Get the cropped image data
             const croppedCanvas = cropper.getCroppedCanvas({ width: 500, height: 500 });
-            croppedData = croppedCanvas.toDataURL('image/jpeg');
+            const croppedData = croppedCanvas.toDataURL('image/jpeg');
 
             // Hide step 2, show step 3
             document.getElementById('step2').style.display = 'none';
