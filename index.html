@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twibbon Generator</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+        }
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            display: none; /* Hide the canvas initially */
+        }
+        #preview {
+            max-width: 100%;
+            max-height: 500px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Twibbon Generator</h2>
+        <input type="file" id="fileInput" accept="image/*">
+        <br><br>
+        <div>
+            <label for="resizeWidth">Width:</label>
+            <input type="number" id="resizeWidth" min="1" value="500">
+            <label for="resizeHeight">Height:</label>
+            <input type="number" id="resizeHeight" min="1" value="500">
+            <button class="btn" onclick="resizeImage()">Resize Image</button>
+        </div>
+        <br>
+        <div id="previewContainer">
+            <h3>Preview:</h3>
+            <img id="preview" src="" alt="Preview">
+        </div>
+        <br><br>
+        <button class="btn" onclick="generateTwibbon()">Generate Twibbon</button>
+        <br><br>
+        <canvas id="canvas" width="500" height="500"></canvas>
+    </div>
+
+    <script>
+        function resizeImage() {
+            const fileInput = document.getElementById('fileInput');
+            const preview = document.getElementById('preview');
+            const resizeWidth = document.getElementById('resizeWidth').value;
+            const resizeHeight = document.getElementById('resizeHeight').value;
+
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+
+                        canvas.width = resizeWidth;
+                        canvas.height = resizeHeight;
+
+                        ctx.drawImage(img, 0, 0, resizeWidth, resizeHeight);
+
+                        preview.src = canvas.toDataURL('image/jpeg');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please upload an image file.');
+            }
+        }
+
+        function generateTwibbon() {
+            const preview = document.getElementById('preview');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            const img = new Image();
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                // Draw the twibbon frame
+                const frameImg = new Image();
+                frameImg.onload = function() {
+                    ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+
+                    // Export canvas as an image
+                    const twibbonImage = canvas.toDataURL('image/png');
+
+                    // Display the generated twibbon image
+                    const generatedImage = new Image();
+                    generatedImage.src = twibbonImage;
+                    document.body.appendChild(generatedImage); // Example: append to body
+                };
+                frameImg.src = 'twibbon.png'; // Update with your frame image path
+            };
+            img.src = preview.src;
+        }
+    </script>
+</body>
+</html>
