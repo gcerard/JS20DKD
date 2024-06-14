@@ -31,9 +31,13 @@
             border: 1px solid #ccc;
             display: none; /* Hide the canvas initially */
         }
-        #cropper {
+        #cropper-container {
             max-width: 100%;
-            margin-bottom: 20px;
+            margin: 20px auto;
+        }
+        #cropped-image {
+            max-width: 100%;
+            margin: 20px auto;
         }
     </style>
 </head>
@@ -51,8 +55,8 @@
         <!-- Step 2: Crop Image -->
         <div id="step2" style="display: none;">
             <h3>Crop your image to 500x500 pixels</h3>
-            <div id="cropper">
-                <!-- Cropper.js will load the image here -->
+            <div id="cropper-container">
+                <img id="cropped-image">
             </div>
             <br>
             <button class="btn" onclick="generateTwibbon()">Next: Generate Twibbon</button>
@@ -62,6 +66,8 @@
         <div id="step3" style="display: none;">
             <h3>Generated Twibbon</h3>
             <canvas id="canvas" width="500" height="500"></canvas>
+            <br><br>
+            <button class="btn" onclick="restart()">Restart</button>
         </div>
     </div>
 
@@ -70,7 +76,6 @@
 
     <script>
         let cropper;
-        let uploadedImage;
 
         function startCrop() {
             const fileInput = document.getElementById('fileInput');
@@ -87,13 +92,10 @@
                     if (cropper) {
                         cropper.destroy();
                     }
-                    const cropperContainer = document.getElementById('cropper');
+                    const cropperContainer = document.getElementById('cropper-container');
                     cropper = new Cropper(image, {
                         aspectRatio: 1, // Square aspect ratio
                         viewMode: 1, // Restrict the crop box to within the container
-                        crop(event) {
-                            // You can add cropping visualization or other actions here if needed
-                        },
                     });
                     cropperContainer.innerHTML = ''; // Clear container
                     cropperContainer.appendChild(image); // Append image to container
@@ -103,7 +105,6 @@
                     document.getElementById('step2').style.display = 'block';
                 };
                 image.src = e.target.result;
-                uploadedImage = image; // Save the uploaded image
             };
             reader.readAsDataURL(file);
         }
@@ -115,7 +116,38 @@
             }
 
             // Get the cropped image data
-            const croppedCanvas = cropper.getCroppedCanvas({ width: 500, height: 500 });
-            const croppedData = croppedCanvas.toDataURL('image/jpeg');
+            const canvas = cropper.getCroppedCanvas({ width: 500, height: 500 });
+            const croppedData = canvas.toDataURL('image/png');
 
-            // Hide step 2, s
+            // Hide step 2, show step 3
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'block';
+
+            // Display the cropped image
+            const croppedImage = document.getElementById('cropped-image');
+            croppedImage.src = croppedData;
+
+            // Generate Twibbon
+            const ctx = document.getElementById('canvas').getContext('2d');
+            const twibbon = new Image();
+            twibbon.onload = function() {
+                ctx.clearRect(0, 0, 500, 500); // Clear canvas
+                ctx.drawImage(croppedImage, 0, 0, 500, 500); // Draw cropped image
+                ctx.drawImage(twibbon, 0, 0, 500, 500); // Draw twibbon frame
+            };
+            twibbon.src = 'twibbon.png'; // Replace with your frame image path
+        }
+
+        function restart() {
+            // Reset to step 1
+            cropper.destroy();
+            document.getElementById('fileInput').value = ''; // Clear file input
+            document.getElementById('cropped-image').src = ''; // Clear cropped image
+            document.getElementById('canvas').getContext('2d').clearRect(0, 0, 500, 500); // Clear canvas
+            document.getElementById('step1').style.display = 'block';
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
