@@ -55,9 +55,10 @@
 
     <script>
         let cropper;
+        let uploadedImage;
 
         function cropAndGenerate() {
-            if (!cropper) {
+            if (!cropper || !uploadedImage) {
                 alert('Please upload an image first.');
                 return;
             }
@@ -124,6 +125,7 @@
                     });
                     cropperContainer.innerHTML = ''; // Clear container
                     cropperContainer.appendChild(image); // Append image to container
+                    uploadedImage = image; // Store the uploaded image
                 };
                 image.src = e.target.result;
             };
