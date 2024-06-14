@@ -101,16 +101,17 @@
         }
 
         function startDragging(e) {
+            const scale = canvas.width / displayCanvas.width;
             isDragging = true;
-            startX = e.offsetX - imgX * (canvas.width / displayCanvas.width);
-            startY = e.offsetY - imgY * (canvas.width / displayCanvas.width);
+            startX = e.offsetX * scale - imgX;
+            startY = e.offsetY * scale - imgY;
         }
 
         function dragImage(e) {
             if (isDragging) {
                 const scale = canvas.width / displayCanvas.width;
-                imgX = (e.offsetX - startX) * scale;
-                imgY = (e.offsetY - startY) * scale;
+                imgX = e.offsetX * scale - startX;
+                imgY = e.offsetY * scale - startY;
                 drawImage();
             }
         }
