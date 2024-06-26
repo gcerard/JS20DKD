@@ -22,7 +22,6 @@
             align-items: center;
             height: 100vh;
             background-color: #ffffff;
-            flex-direction: column;
         }
         .container {
             text-align: center;
@@ -44,14 +43,6 @@
             width: 350px;  /* Display size */
             height: 350px; /* Display size */
         }
-        .iframe-container {
-            display: flex;
-            align-items: center;
-            margin-top: 20px;
-        }
-        .iframe-container iframe {
-            margin-right: 10px;
-        }
     </style>
 </head>
 <body>
@@ -65,13 +56,8 @@
         <canvas id="displayCanvas" width="300" height="300"></canvas>
         <br><br>
         <button class="btn" onclick="downloadImage()">Download Image</button>
-        <div class="iframe-container">
-            <iframe width="110" height="200" src="https://www.myinstants.com/instant/sicko-mode-meme-sfx-86403/embed/" frameborder="0" scrolling="no"></iframe>
-            <button class="btn" onclick="alert('Button clicked!')">Click Me</button>
-        </div>
         <div class="credit">
             <a href="https://www.github.com/gcerard" target="_blank">@gcerard</a> on GitHub
-        </div>
     </div>
 
     <script>
@@ -200,4 +186,16 @@
 
         function getDistance(touches) {
             const dx = touches[0].clientX - touches[1].clientX;
-            
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'twibbon.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
