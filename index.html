@@ -12,12 +12,26 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            background-color: #f0f0f0;
+            position: relative;
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background-image: url('https://i.pinimg.com/564x/05/81/3c/05813c7bb3803d751fd2412bc4a4f9d6.jpg'); /* Update with your image URL */
             background-size: cover;
             background-position: center;
+            opacity: 0.5;
+            z-index: -1;
         }
         .container {
             text-align: center;
+            position: relative;
+            z-index: 1;
         }
         .btn {
             padding: 10px 20px;
@@ -52,11 +66,11 @@
         <button class="btn" onclick="generateTwibbon()">Generate Twibbon</button>
         <br><br>
         <canvas id="canvas" width="1080" height="1080" style="display: none;"></canvas>
-        <canvas id="displayCanvas" width="500" height="500"></canvas>
+        <canvas id="displayCanvas" width="300" height="300"></canvas>
         <br><br>
         <button class="btn" onclick="downloadImage()">Download Image</button>
         <div class="iframe-container">
-            <iframe width="66" height="120" src="https://www.myinstants.com/instant/ack-87763/embed/" frameborder="0" scrolling="no"></iframe>
+            <iframe width="110" height="200" src="https://www.myinstants.com/instant/ack-87763/embed/" frameborder="0" scrolling="no"></iframe>
         </div>
         <div class="credit">
             <a href="https://www.github.com/gcerard" target="_blank">@gcerard</a> on GitHub
